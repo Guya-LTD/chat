@@ -3,10 +3,10 @@ var router = express.Router();
 
 var messageController = require('../controllers/message');
 
-/* GET messages of cutomer's. */
-router.get('/v1/chats/:customerId/messages', messageController.getAll);
+/* GET messages of user's. */
+router.get('/v1/chats/:userId/messages', messageController.getAll);
 
 /** POST create new message */
-router.get('/v1/chats/:customerId/messages', messageController.post)
+router.post('/v1/chats/:userId/messages', messageController.post)
 
 module.exports = router;
