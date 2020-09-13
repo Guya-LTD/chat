@@ -92,6 +92,8 @@ io.on('connection', function (socket) {
      * Create room for customer.
      */
     socket.on('customer:room:create', function() {
+        // Check if any support user is online.
+        if(Object.keys(supports).length) socket.emit('support:count:notify', 0);
         // One user cannot create morethan one room at a time or atleaset that room must be
         // deleted/removed.
         // Create room by adding oti with socket id for unique room var.
@@ -141,7 +143,7 @@ io.on('connection', function (socket) {
         supports[socket.oti] = support;
         // Notify the support user the total number of online users and waiting users.
         total_online = Object.keys(customers).length;
-        waiting_customers = customers.length - Object.keys(supports).length * maxroom
+        waiting_customers = Object.keys(customers).length - Object.keys(supports).length * maxroom
         // If toal waiting custtomers is 0 and +ve all supports are taken, else if its negitive number
         // there is room for the user.
         if(waiting_customers < 0) waiting_customers = 0;
