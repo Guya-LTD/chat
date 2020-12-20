@@ -33,37 +33,19 @@ var maxroom = 2;
 // scoket.io middleware
 // OTI Authentication
 io.use((socket, next) => {
-    /*if (socket.handshake.query && socket.handshake.query.token && socket.handshake.query.oti){
-        //get credentials sent by the client
-        var oti = data.oti;
-        var token = data.token;
-
-        axios.post(gatekeeper_url, {
-            oti: oti,
-            token: token
-        })
-        .then(function (response) {
-            console.log(response);
-            if (response.status != 200) return callback(new Error(response.error));
-            // save auth datas
-            socket.user = response.data
-            socket.oti = oti
-            return callback(null, true);
-        })
-        .catch(function (error) {
-            console.log(error);
-            return callback(new Error(error));
-        });
+    if (socket.handshake.query && socket.handshake.query.name && socket.handshake.query.type){
+       socket.name = socket.handshake.query.name;
+       socket.type = socket.handshake.query.type;
     }else{
-        next(new Error('Authentication error'));
-    }*/
-    socket.oti = 'oti' +  Math.random()
+       return next(new Error('Name and Type is required'));
+    }
+    /*socket.oti = 'oti' +  Math.random()
     socket.user = {
         username: 'username' + Math.random(),
         code: 'code' + Math.random()
-    }
+    }*/
 
-    console.log('middleware');
+    //console.log('middleware');
     next();
 });
 
@@ -134,13 +116,16 @@ io.on('connection', function (socket) {
     });
 
     /**
+     * Step 1 for support/admin
      * Add/notify support is joining online/connection.
      */
     socket.on('support:connection:join', function() {
         // Get current socket state datas.
         // Add empty room on supports first joining the connection.
-        support = { oti: socket.oti, socket: socket, user: socket.user, rooms: [] };
-        supports[socket.oti] = support;
+        //support = { oti: socket.oti, socket: socket, user: socket.user, rooms: [] };
+        //supports[socket.oti] = support;
+        support = { name: socket.name, type: socket.type, socket: socket, rooms: [] };
+        supports[socket.name] = support;
         // Notify the support user the total number of online users and waiting users.
         total_online = Object.keys(customers).length;
         waiting_customers = Object.keys(customers).length - Object.keys(supports).length * maxroom
@@ -166,6 +151,11 @@ io.on('connection', function (socket) {
      */
     socket.on('disconnect', function() {
         // Check if customer is disconnected and pop romms
+        // based on type
+        if(socket.type == 'support')
+            delete supports[socket.name];
+        else if (socket.type == 'customer')
+            delete customers[socket.name];
     }) 
 });
 
