@@ -60,13 +60,16 @@ io.on('connection', function (socket) {
     });
 
     /**
+     * Step 1 for customer
      * Add and notify that new customer is joined/online.
      */
     socket.on('customer:connection:join', function() {
         // Get current socket state datas.
         // Add empty room on supports first joining the connection.
-        customer = { oti: socket.oti, socket: socket, user: socket.user, room: null };
-        customers[socket.oti] = customer;
+        //customer = { oti: socket.oti, socket: socket, user: socket.user, room: null };
+        //customers[socket.oti] = customer;
+        customer = { name: socket.name, type: socket.type, socket: socket, room: null };
+        customers[socket.name] = customer;
         socket.emit('customer:connection:created', socket.user);
     });
 
