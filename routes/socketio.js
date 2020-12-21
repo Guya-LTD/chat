@@ -74,6 +74,7 @@ io.on('connection', function (socket) {
     });
 
     /**
+     * Step 2 for customer.
      * Create room for customer.
      */
     socket.on('customer:room:create', function() {
@@ -82,7 +83,7 @@ io.on('connection', function (socket) {
         // One user cannot create morethan one room at a time or atleaset that room must be
         // deleted/removed.
         // Create room by adding oti with socket id for unique room var.
-        room = socket.id + '#' + socket.oti;
+        room = socket.id + '#' + socket.name;
         // Prevent from adding same room in rooms.
         if(rooms.indexOf(room) == -1) rooms.push(room);
         // Set the room to curent socket globaly
@@ -92,6 +93,7 @@ io.on('connection', function (socket) {
     });
 
     /**
+     * Step 3 for customer
      * Add support to customers room.
      * Here create room and assign randommly support user i.e add support to users room.
      */
@@ -115,7 +117,8 @@ io.on('connection', function (socket) {
             }
         };
         // Join user and customer support 
-        try{ supports[min_oti].socket.join(socket.room); }catch(error){socket.emit('error:room:join', 'There is not support')}
+        // And append rooms id to support's rooms
+        try{ supports[min_oti].socket.join(socket.room); supports[min_oti].rooms.push(socket.room)}catch(error){socket.emit('error:room:join', 'There is no support')}
     });
 
     /**
@@ -123,7 +126,7 @@ io.on('connection', function (socket) {
      * Add/notify support is joining online/connection.
      */
     socket.on('support:connection:join', function() {
-        // Get current socket state datas.
+        // Get current sockmin_otiet state datas.
         // Add empty room on supports first joining the connection.
         //support = { oti: socket.oti, socket: socket, user: socket.user, rooms: [] };
         //supports[socket.oti] = support;
@@ -139,11 +142,22 @@ io.on('connection', function (socket) {
     });
 
     /**
+     * Get all supports details
+     */
+    socket.on('support:details:get', function() {
+        var x = {
+            name: socket.name,
+            type: socket.type,
+            rooms: supports[socket.name].rooms
+        }
+        socket.emit('support:details:list', x);
+    })
+
+    /**
      * Recive Chat
      */
     socket.on('chat:message:send', function(data) {
-        console.log(data);
-        socket.emit('chat:message:receive', 'Abcd');
+        //socket.emit('chat:message:receive', 'Abcd');
         //io.sockets.socket(data.room).emit('chat:message:receive', data.message); 
         //io.emit('chat:message:receive', data.message);
         socket.broadcast.to(data.room).emit('chat:message:receive', data.message);
