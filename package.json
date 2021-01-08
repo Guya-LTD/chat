@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "nodemon ./bin/www",
     "start:watch": "nodemon ./bin/www",
     "debug": "node-debug ./bin/www",
     "commit": "npx git-cz",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "commitizen": "^4.1.2",
-    "nodemon": "^2.0.4",
+    "nodemon": "^2.0.6",
     "semantic-release": "^17.1.1",
     "sequelize-cli": "^6.2.0"
   },

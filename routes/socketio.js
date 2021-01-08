@@ -21,7 +21,7 @@ var customers = {};
 var supports = {};
 
 /** 
- * Customer service online users
+ * Customer service online users     
  */
 var rooms = [];
 
@@ -36,7 +36,9 @@ io.use((socket, next) => {
     if (socket.handshake.query && socket.handshake.query.name && socket.handshake.query.type){
        socket.name = socket.handshake.query.name;
        socket.type = socket.handshake.query.type;
+       return next();
     }else{
+        console.log("erroroccurred")
        return next(new Error('Name and Type is required'));
     }
     /*socket.oti = 'oti' +  Math.random()
@@ -51,11 +53,10 @@ io.use((socket, next) => {
 
 // Handle connection
 io.on('connection', function (socket) {
-
     /**
      * Get total online supports.
      */
-    socket.on('support:connection:count', function(data) {
+    socket.on('support:connection:count', function() {
         socket.emit('support:connection:count', Object.keys(supports).length.toString());
     });
 
@@ -71,6 +72,7 @@ io.on('connection', function (socket) {
         customer = { name: socket.name, type: socket.type, socket: socket, room: null };
         customers[socket.name] = customer;
         socket.emit('customer:connection:created', socket.user);
+        //socket.broadcast.emit('support:details:list')
     });
 
     /**
@@ -126,19 +128,24 @@ io.on('connection', function (socket) {
      * Add/notify support is joining online/connection.
      */
     socket.on('support:connection:join', function() {
+        var message = 'Joined';
         // Get current sockmin_otiet state datas.
         // Add empty room on supports first joining the connection.
         //support = { oti: socket.oti, socket: socket, user: socket.user, rooms: [] };
         //supports[socket.oti] = support;
         support = { name: socket.name, type: socket.type, socket: socket, rooms: [] };
-        supports[socket.name] = support;
+        if(!supports.hasOwnProperty(socket.name))
+            // Add only if not existed
+            supports[socket.name] = support;
+        else
+            message = 'Already joined';
         // Notify the support user the total number of online users and waiting users.
         total_online = Object.keys(customers).length;
         waiting_customers = Object.keys(customers).length - Object.keys(supports).length * maxroom
         // If toal waiting custtomers is 0 and +ve all supports are taken, else if its negitive number
         // there is room for the user.
         if(waiting_customers < 0) waiting_customers = 0;
-        socket.emit('support:customers:count:notify', { total: total_online, waiting: waiting_customers });
+        socket.emit('support:customers:count:notify', { total: total_online, waiting: waiting_customers, message: message });
     });
 
     /**
